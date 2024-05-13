@@ -28,6 +28,7 @@ async function run() {
     await client.connect();
 
     const foodFlowCollection = client.db("FoodFlow").collection("foodInfo");
+    const requestCollection = client.db("FoodFlow").collection("requestInfo");
 
     //post new food
     app.post("/food", async (req, res) => {
@@ -65,26 +66,49 @@ async function run() {
     //delete post from data by id
     app.delete("/delete/:id", async (req, res) => {
       const id = req.params.id;
-      const quary = { _id : new ObjectId(id) };
+      const quary = { _id: new ObjectId(id) };
       const result = await foodFlowCollection.deleteOne(quary);
       res.send(result);
     });
 
     //update foodinfo by id
-    app.put('/update/:id', async(req, res)=>{
+    app.put("/update/:id", async (req, res) => {
       const id = req.params.id;
       const upinfo = req.body;
-      const quary = {_id : new ObjectId(id)}
+      const quary = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updateDoc = {
         $set: {
           ...upinfo,
         },
       };
-      const result = await foodFlowCollection.updateOne(quary, updateDoc, options);
+      const result = await foodFlowCollection.updateOne(
+        quary,
+        updateDoc,
+        options
+      );
       res.send(result);
-    })
+    });
 
+
+    //**********Request food information************ */
+
+    //post request info
+    app.post("/request", async (req, res) => {
+      const add = req.body;
+      console.log(add);
+      const result = await requestCollection.insertOne(add);
+      res.send(result);
+    });
+
+    //get the request data 
+    app.get('/request/:email', async(req, res)=>{
+      const email = req.params.email;
+      const quary = {email : email}
+      const result = await requestCollection.find(quary).toArray();
+      res.send(result);
+      
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
