@@ -56,15 +56,35 @@ async function run() {
     // find food lsit by email
     app.get("/foods/:email", async (req, res) => {
       const email = req.params.email;
-      console.log("quary emali : ", email);
-      const query = { "donar.donar_email" : email };
+      // console.log("quary emali : ", email);
+      const query = { "donar.donar_email": email };
       const result = await foodFlowCollection.find(query).toArray();
       res.send(result);
     });
 
-    // donar
-    // donar_email
- 
+    //delete post from data by id
+    app.delete("/delete/:id", async (req, res) => {
+      const id = req.params.id;
+      const quary = { _id : new ObjectId(id) };
+      const result = await foodFlowCollection.deleteOne(quary);
+      res.send(result);
+    });
+
+    //update foodinfo by id
+    app.put('/update/:id', async(req, res)=>{
+      const id = req.params.id;
+      const upinfo = req.body;
+      const quary = {_id : new ObjectId(id)}
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          ...upinfo,
+        },
+      };
+      const result = await foodFlowCollection.updateOne(quary, updateDoc, options);
+      res.send(result);
+    })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
