@@ -25,7 +25,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const foodFlowCollection = client.db("FoodFlow").collection("foodInfo");
     const requestCollection = client.db("FoodFlow").collection("requestInfo");
@@ -90,7 +90,6 @@ async function run() {
       res.send(result);
     });
 
-
     //**********Request food information************ */
 
     //post request info
@@ -101,17 +100,16 @@ async function run() {
       res.send(result);
     });
 
-    //get the request data 
-    app.get('/request/:email', async(req, res)=>{
+    //get the request data
+    app.get("/request/:email", async (req, res) => {
       const email = req.params.email;
-      const quary = {email : email}
+      const quary = { email: email };
       const result = await requestCollection.find(quary).toArray();
       res.send(result);
-      
-    })
+    });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
