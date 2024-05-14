@@ -16,6 +16,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
+      "http://localhost:5174",
       "https://foodflow-8400c.web.app",
       "https://foodflow-8400c.firebaseapp.com",
     ],
