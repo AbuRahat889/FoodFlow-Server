@@ -115,9 +115,9 @@ async function run() {
       const email = req.params.email;
       const query = { "donar.donar_email": email };
 
-      if (req.query.email !== req.user.email) {
-        return res.status(403).send({ message: "forbidden access" });
-      }
+      // if (req.query.email !== req.user.email) {
+      //   return res.status(403).send({ message: "forbidden access" });
+      // }
 
       const result = await foodFlowCollection.find(query).toArray();
       console.log(result);
