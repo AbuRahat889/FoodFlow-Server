@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -13,7 +14,11 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:5174", "http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://foodflow-8400c.web.app",
+      "https://foodflow-8400c.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
@@ -47,6 +52,12 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+const cookieOption = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production" ? true : false,
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+};
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -63,20 +74,16 @@ async function run() {
         expiresIn: "1h",
       });
 
-      res
-        .cookie("token", token, {
-          httpOnly: true,
-          secure: true,
-          sameSite: "strict",
-        })
-        .send({ success: true });
+      res.cookie("token", token, cookieOption).send({ success: true });
     });
 
     //clearing Token
     app.post("/logout", async (req, res) => {
       const user = req.body;
       console.log("logging out", user);
-      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+      res
+        .clearCookie("token", { ...cookieOption, maxAge: 0 })
+        .send({ success: true });
     });
 
     //post new food
@@ -106,14 +113,14 @@ async function run() {
     // find food lsit by email
     app.get("/foods/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
+      const query = { "donar.donar_email": email };
 
-      console.log("cookkeeeeeeeeessss ", req.user);
-      if (req.user.email !== req.query.email) {
-        return res.status(403).send({ messagae: "forbidden access" });
+      if (req.query.email !== req.user.email) {
+        return res.status(403).send({ message: "forbidden access" });
       }
 
-      const query = { "donar.donar_email": email };
       const result = await foodFlowCollection.find(query).toArray();
+      console.log(result);
       res.send(result);
     });
 
@@ -161,6 +168,7 @@ async function run() {
       // if (req.user.email !== req.query.email) {
       //   return res.status(403).send({ messagae: "forbidden access" });
       // }
+
       const quary = { email: email };
       const result = await requestCollection.find(quary).toArray();
       res.send(result);
